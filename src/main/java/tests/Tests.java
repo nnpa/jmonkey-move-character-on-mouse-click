@@ -113,11 +113,11 @@ private Spatial player;
 
     SphereCollisionShape sphereShape = new SphereCollisionShape(1.2f);
     characterControl = new CharacterControl( sphereShape , 1.2f );
-    characterControl.setApplyPhysicsLocal(true);
     player.addControl(characterControl);
     characterControl.setPhysicsLocation(new Vector3f(0,2f,0));
     rootNode.attachChild(player);
-
+     bulletAppState.getPhysicsSpace().add(characterControl);
+    
     //init flor
     Spatial    flor = assetManager.loadModel("Models/flor.glb");
     shootables.attachChild(flor);
@@ -168,12 +168,12 @@ private Spatial player;
        
     }
   private Vector3f moveTo = null;
-  private float interp = 0.0f;
-  private float moveSpeed = 0.05f;
   
+  private Vector3f  walkDirection = new Vector3f(0,0,0);
+
   @Override
   public void simpleUpdate(float tpf) {
-    
+    walkDirection.set(0, 0, 0);
     if(moveTo != null){
         
         //set loock at mark
@@ -181,15 +181,12 @@ private Spatial player;
         //get player position
         Vector3f playerPosition = characterControl.getPhysicsLocation();
         float distance = playerPosition.distance(moveTo);
-        
-        if(distance > 2f){
-            //move character
-            interp += (moveSpeed/distance) * tpf;
-            characterControl.setPhysicsLocation(new Vector3f().interpolateLocal(playerPosition, moveTo, interp));
-        }else{
-            interp =  0.0f;
+        if(distance > 0.2f){
+            Vector3f direction = moveTo.subtract(playerPosition).normalize();
+            walkDirection.addLocal(direction);
+            characterControl.setWalkDirection(walkDirection.mult(0.3f));
         }
-        
     }
+
   }
 }
